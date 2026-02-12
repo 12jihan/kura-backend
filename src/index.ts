@@ -56,6 +56,27 @@ app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+app.get("/api/user", async (req, res) => {
+  const _req = req.query;
+
+  const _query: string = `
+    SELECT *
+    FROM profiles
+    WHERE firebase_uid = '${_req.uid}'
+  `
+
+  try {
+    if (!_req.uid) throw Error("UID was not provided");
+    const results = await pool.query(_query);
+    const data = results.rows[0];
+    console.log("query results", data);
+
+    res.status(200).json({ status: "success", data: data });
+  } catch (err) {
+    res.status(401).json({ status: "error", message: err })
+  }
+});
+
 app.post("/api/profile/onboard", async (req, res): Promise<unknown> => {
 
   const _req = req.body;
@@ -87,7 +108,7 @@ app.post("/api/profile/onboard", async (req, res): Promise<unknown> => {
     _data['firebase_uid'],
     _data['email']
   ];
-  console.log("the value of them all", values);
+  // console.log("the value of them all", values);
 
   try {
     const results = await pool.query(query, values);

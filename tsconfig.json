@@ -16,8 +16,8 @@
     // and npm install -D @types/node
     // Other Outputs
     "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": false,
+    "declarationMap": false,
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
@@ -30,8 +30,8 @@
     // "noPropertyAccessFromIndexSignature": true,
     // Recommended Options
     "allowSyntheticDefaultImports": true,
-    "emitDeclarationOnly": true,
-    "allowImportingTsExtensions": true,
+    "emitDeclarationOnly": false,
+    "allowImportingTsExtensions": false,
     "strict": true,
     "jsx": "react-jsx",
     "verbatimModuleSyntax": true,

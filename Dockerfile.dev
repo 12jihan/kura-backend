@@ -1,0 +1,21 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install development tools
+RUN npm install -g tsx nodemon
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies (including devDependencies)
+RUN npm install
+
+# Copy source (will be overridden by volume mount)
+COPY . .
+
+# Expose port
+EXPOSE 3000
+
+# Start with nodemon for hot reload
+CMD ["nodemon", "--exec", "tsx", "src/index.ts"]

@@ -8,6 +8,21 @@ const PORT = 3000;
 app.use(express.json());
 app.use(cors());
 
+app.get("/health", async (req, res): Promise<void> => {
+  console.log("Health check test");
+  try {
+    res.status(200).json({
+      status: "success",
+      message: "This was successful and health looks great",
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: err,
+    });
+  }
+});
+
 app.get("/posts", async (req: Request, res: Response): Promise<void> => {
   try {
     const query = `
@@ -63,7 +78,7 @@ app.get("/api/user", async (req, res) => {
     SELECT *
     FROM profiles
     WHERE firebase_uid = '${_req.uid}'
-  `
+  `;
 
   try {
     if (!_req.uid) throw Error("UID was not provided");
@@ -73,15 +88,14 @@ app.get("/api/user", async (req, res) => {
 
     res.status(200).json({ status: "success", data: data });
   } catch (err) {
-    res.status(401).json({ status: "error", message: err })
+    res.status(401).json({ status: "error", message: err });
   }
 });
 
 app.post("/api/profile/onboard", async (req, res): Promise<unknown> => {
-
   const _req = req.body;
-  const _step = _req['step'];
-  const _data = _req['data'];
+  const _step = _req["step"];
+  const _data = _req["data"];
 
   console.log("request:", _req);
   const query = `
@@ -99,14 +113,14 @@ app.post("/api/profile/onboard", async (req, res): Promise<unknown> => {
     RETURNING *
   `;
   const values: any = [
-    _data['handle'],
-    _data['content_type'],
-    _data['brand_description'],
-    _data['keywords'],
-    _data['onboarding_step'],
-    _data['onboarding_complete'],
-    _data['firebase_uid'],
-    _data['email']
+    _data["handle"],
+    _data["content_type"],
+    _data["brand_description"],
+    _data["keywords"],
+    _data["onboarding_step"],
+    _data["onboarding_complete"],
+    _data["firebase_uid"],
+    _data["email"],
   ];
   // console.log("the value of them all", values);
 
@@ -156,7 +170,7 @@ app.post("/posts", async (req: Request, res: Response): Promise<void> => {
 app.delete("/post", async (req: Request): Promise<void> => {
   const _req: Request = req.body;
   console.log("request: ", _req);
-})
+});
 
 app.listen(PORT, (error) => {
   if (error) return;

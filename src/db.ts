@@ -32,5 +32,3 @@ export default pool;
 //   platform: string;
 //   is_edited: boolean;
 // }
-
-

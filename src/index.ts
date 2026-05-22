@@ -5,6 +5,12 @@ import pool from "./db.js";
 const app = express();
 const PORT = 3000;
 
+// FOR TESTING TO SEE WHAT IT'S RECEIVING
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}  →  req.url=${req.url}`);
+  next();
+});
+
 app.use(express.json());
 app.use(cors());
 
@@ -46,17 +52,18 @@ app.get("/posts", async (req: Request, res: Response): Promise<void> => {
 app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
   try {
     const query = `
-      SELECT 
-        id, 
-        user_id, 
-        content, 
-        original_content, 
-        status, 
-        created_at,  
-        updated_at, 
+      SELECT
+        id,
+        user_id,
+        content,
+        original_content,
         platform,
-        is_edited
-      FROM documents 
+        status,
+        is_edited,
+        created_at,
+        updated_at
+      FROM cards
+      ORDER BY created_at DESC
     `;
     const results = await pool.query(query);
     console.log("Results:\n", results.rows);
@@ -74,6 +81,7 @@ app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
 app.get("/api/user", async (req, res) => {
   const _req = req.query;
 
+  console.log(_req);
   const _query: string = `
     SELECT *
     FROM profiles
@@ -84,7 +92,7 @@ app.get("/api/user", async (req, res) => {
     if (!_req.uid) throw Error("UID was not provided");
     const results = await pool.query(_query);
     const data = results.rows[0];
-    console.log("query results", data);
+    console.log("query results:", data);
 
     res.status(200).json({ status: "success", data: data });
   } catch (err) {
@@ -92,11 +100,48 @@ app.get("/api/user", async (req, res) => {
   }
 });
 
+// I don't think that this will be needed at all
+// app.get("/api/profile", async (req, res): Promise<unknown> => {
+//   const _req = req.body;
+//   console.log("current body", _req);
+//   const _step = _req["step"];
+//   const _data = _req["data"];
+//   const _fbuid = [_req["data"]["firebase_uid"]];
+//
+//   console.log("step:", _step);
+//   console.log("req:", _req);
+//   console.log("data:", _data);
+//
+//   const query = `
+//     SELECT 
+//       handle,
+//       content_type,
+//       brand_description,
+//       keywords,
+//       onboarding_step,
+//       onboarding_complete,
+//       firebase_uid,
+//       email
+//     FROM profiles
+//     WHERE firebase_uid = $1
+//   `;
+//
+//   try {
+//     const results = await pool.query(query, _fbuid);
+//     console.log("results:\n", results.rows);
+//     return res.status(200).json({ message: "success", body: req.body });
+//   } catch (err: unknown) {
+//     console.error(err);
+//     return res.status(401).json({ message: err });
+//   }
+// });
+
 app.post("/api/profile/onboard", async (req, res): Promise<unknown> => {
   const _req = req.body;
   const _step = _req["step"];
   const _data = _req["data"];
 
+  console.log("step:", _step);
   console.log("request:", _req);
   const query = `
     INSERT INTO profiles (

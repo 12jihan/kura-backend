@@ -10,11 +10,10 @@ dotenv.config();
 
 const pool = new Pool({
   host: process.env.PG_HOST,
-  // port: Number(process.env.PG_PORT),
-  port: 5433,
+  port: parseInt(process.env.PG_PORT ?? '5433', 10),
   user: process.env.PG_USER,
-  database: process.env.PG_NAME,
   password: process.env.PG_PASS,
+  database: process.env.PG_NAME,
 });
 
 export default pool;

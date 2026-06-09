@@ -81,7 +81,7 @@ app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
 app.get("/api/user", async (req, res) => {
   const _req = req.query;
 
-  console.log(_req);
+  console.log("[/api/user]:", _req);
   const _query: string = `
     SELECT *
     FROM profiles
@@ -170,11 +170,14 @@ app.post("/api/profile/onboard", async (req, res): Promise<unknown> => {
   // console.log("the value of them all", values);
 
   try {
-    const results = await pool.query(query, values);
+    let results = await pool.query(query, values);
+    results = results.rows[0];
     console.log("results:\n", results.rows);
-    return res.status(200).json({ message: "success", body: req.body });
+
+    return res.status(200).json({ message: "success", body: results });
   } catch (err: unknown) {
     console.error(err);
+
     return res.status(401).json({ message: err });
   }
 });

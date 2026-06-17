@@ -68,11 +68,11 @@ app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
     const results = await pool.query(query);
     console.log("Results:\n", results.rows);
 
-    res.json({ message: "posted", data: results.rows });
+    res.json({ message: "success", data: results.rows });
   } catch (err) {
     console.log("there was an error!", err);
     res.status(500).json({
-      error: "500",
+      error: "failed",
       message: err,
     });
   }

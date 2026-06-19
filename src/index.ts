@@ -1,13 +1,18 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express, { type Request, type Response } from "express";
 import cors from "cors";
 import pool from "./db.js";
+
+import cards_router from './routes/card.routes.js';
 
 const app = express();
 const PORT = 3000;
 
 // FOR TESTING TO SEE WHAT IT'S RECEIVING
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}  →  req.url=${req.url}`);
+  // console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}  →  req.url=${req.url}`);
   next();
 });
 
@@ -49,6 +54,8 @@ app.get("/posts", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+app.use(cards_router);
+
 app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
   try {
     const query = `
@@ -66,7 +73,7 @@ app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
       ORDER BY created_at DESC
     `;
     const results = await pool.query(query);
-    console.log("Results:\n", results.rows);
+    // console.log("Results:\n", results.rows);
 
     res.json({ message: "success", data: results.rows });
   } catch (err) {
@@ -78,34 +85,34 @@ app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-app.get("/api/cards/generate:id", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const query = `
-      SELECT
-        id,
-        user_id,
-        content,
-        original_content,
-        platform,
-        status,
-        is_edited,
-        created_at,
-        updated_at
-      FROM cards
-      ORDER BY created_at DESC
-    `;
-    const results = await pool.query(query);
-    console.log("Results:\n", results.rows);
-
-    res.json({ message: "success", data: results.rows });
-  } catch (err) {
-    console.log("there was an error!", err);
-    res.status(500).json({
-      error: "failed",
-      message: err,
-    });
-  }
-});
+// app.get("/api/cards/generate:id", async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const query = `
+//       SELECT
+//         id,
+//         user_id,
+//         content,
+//         original_content,
+//         platform,
+//         status,
+//         is_edited,
+//         created_at,
+//         updated_at
+//       FROM cards
+//       ORDER BY created_at DESC
+//     `;
+//     const results = await pool.query(query);
+//     console.log("Results:\n", results.rows);
+//
+//     res.json({ message: "success", data: results.rows });
+//   } catch (err) {
+//     console.log("there was an error!", err);
+//     res.status(500).json({
+//       error: "failed",
+//       message: err,
+//     });
+//   }
+// });
 
 app.get("/api/user", async (req, res) => {
   const _req = req.query;

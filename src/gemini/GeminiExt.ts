@@ -33,6 +33,7 @@ class GeminiExt {
   ai: GoogleGenAI;
 
   constructor() {
+    console.log("key:", process.env.GEMINI_API_KEY);
     this.ai = new GoogleGenAI({
       apiKey: process.env.GEMINI_API_KEY as string ?? ""
     });

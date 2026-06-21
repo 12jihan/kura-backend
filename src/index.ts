@@ -5,7 +5,9 @@ import express, { type Request, type Response } from "express";
 import cors from "cors";
 import pool from "./db.js";
 
-import cards_router from './routes/card.routes.js';
+import health_router from './routes/cards/card.routes.js';
+import cards_router from './routes/cards/card.routes.js';
+import users_router from './routes/users/users.routes.js';
 
 const app = express();
 const PORT = 3000;
@@ -19,71 +21,39 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cors());
 
-app.get("/health", async (req, res): Promise<void> => {
-  console.log("Health check test");
-  try {
-    res.status(200).json({
-      status: "success",
-      message: "This was successful and health looks great",
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err,
-    });
-  }
-});
 
-app.get("/posts", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const query = `
-      SELECT id, text, hashtags, created_at, modified_at, posted, deleted 
-      FROM documents 
-      ORDER BY id ASC
-    `;
-    const results = await pool.query(query);
-    console.log("Results:\n", results.rows);
-
-    res.json({ message: "posted", data: results.rows });
-  } catch (err) {
-    console.log("there was an error!", err);
-    res.status(500).json({
-      error: "500",
-      message: err,
-    });
-  }
-});
-
+app.use(health_router);
+app.use(users_router);
 app.use(cards_router);
 
-app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const query = `
-      SELECT
-        id,
-        user_id,
-        content,
-        original_content,
-        platform,
-        status,
-        is_edited,
-        created_at,
-        updated_at
-      FROM cards
-      ORDER BY created_at DESC
-    `;
-    const results = await pool.query(query);
-    // console.log("Results:\n", results.rows);
-
-    res.json({ message: "success", data: results.rows });
-  } catch (err) {
-    console.log("there was an error!", err);
-    res.status(500).json({
-      error: "failed",
-      message: err,
-    });
-  }
-});
+// app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const query = `
+//       SELECT
+//         id,
+//         user_id,
+//         content,
+//         original_content,
+//         platform,
+//         status,
+//         is_edited,
+//         created_at,
+//         updated_at
+//       FROM cards
+//       ORDER BY created_at DESC
+//     `;
+//     const results = await pool.query(query);
+//     // console.log("Results:\n", results.rows);
+//
+//     res.json({ message: "success", data: results.rows });
+//   } catch (err) {
+//     console.log("there was an error!", err);
+//     res.status(500).json({
+//       error: "failed",
+//       message: err,
+//     });
+//   }
+// });
 
 // app.get("/api/cards/generate:id", async (req: Request, res: Response): Promise<void> => {
 //   try {
@@ -114,27 +84,6 @@ app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
 //   }
 // });
 
-app.get("/api/user", async (req, res) => {
-  const _req = req.query;
-
-  console.log("[/api/user]:", _req);
-  const _query: string = `
-    SELECT *
-    FROM profiles
-    WHERE firebase_uid = '${_req.uid}'
-  `;
-
-  try {
-    if (!_req.uid) throw Error("UID was not provided");
-    const results = await pool.query(_query);
-    const data = results.rows[0];
-    console.log("query results:", data);
-
-    res.status(200).json({ status: "success", data: data });
-  } catch (err) {
-    res.status(401).json({ status: "error", message: err });
-  }
-});
 
 // I don't think that this will be needed at all
 // app.get("/api/profile", async (req, res): Promise<unknown> => {

@@ -1,7 +1,4 @@
 import { Pool, type PoolConfig } from "pg";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 // postgresql://{user}:{password}@{host}:{port}/{dbname}
 //

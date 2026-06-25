@@ -1,104 +1,90 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express, { type Request, type Response } from "express";
 import cors from "cors";
 import pool from "./db.js";
+
+import health_routers from './routes/health/health.routes.js';
+import cards_routers from './routes/cards/cards.routes.js';
+import users_routers from './routes/users/users.routes.js';
+import posts_routers from './routes/posts/posts.routes.js';
 
 const app = express();
 const PORT = 3000;
 
 // FOR TESTING TO SEE WHAT IT'S RECEIVING
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}  →  req.url=${req.url}`);
-  next();
-});
+// app.use((req, res, next) => {
+//   // console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}  →  req.url=${req.url}`);
+//   next();
+// });
 
 app.use(express.json());
 app.use(cors());
 
-app.get("/health", async (req, res): Promise<void> => {
-  console.log("Health check test");
-  try {
-    res.status(200).json({
-      status: "success",
-      message: "This was successful and health looks great",
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err,
-    });
-  }
-});
+app.use("api/v1", health_routers);
+app.use("api/v1", users_routers);
+app.use("api/v1", cards_routers);
+app.use("api/v1", posts_routers);
 
-app.get("/posts", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const query = `
-      SELECT id, text, hashtags, created_at, modified_at, posted, deleted 
-      FROM documents 
-      ORDER BY id ASC
-    `;
-    const results = await pool.query(query);
-    console.log("Results:\n", results.rows);
+// app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const query = `
+//       SELECT
+//         id,
+//         user_id,
+//         content,
+//         original_content,
+//         platform,
+//         status,
+//         is_edited,
+//         created_at,
+//         updated_at
+//       FROM cards
+//       ORDER BY created_at DESC
+//     `;
+//     const results = await pool.query(query);
+//     // console.log("Results:\n", results.rows);
+//
+//     res.json({ message: "success", data: results.rows });
+//   } catch (err) {
+//     console.log("there was an error!", err);
+//     res.status(500).json({
+//       error: "failed",
+//       message: err,
+//     });
+//   }
+// });
 
-    res.json({ message: "posted", data: results.rows });
-  } catch (err) {
-    console.log("there was an error!", err);
-    res.status(500).json({
-      error: "500",
-      message: err,
-    });
-  }
-});
+// app.get("/api/cards/generate:id", async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const query = `
+//       SELECT
+//         id,
+//         user_id,
+//         content,
+//         original_content,
+//         platform,
+//         status,
+//         is_edited,
+//         created_at,
+//         updated_at
+//       FROM cards
+//       ORDER BY created_at DESC
+//     `;
+//     const results = await pool.query(query);
+//     console.log("Results:\n", results.rows);
+//
+//     res.json({ message: "success", data: results.rows });
+//   } catch (err) {
+//     console.log("there was an error!", err);
+//     res.status(500).json({
+//       error: "failed",
+//       message: err,
+//     });
+//   }
+// });
 
-app.get("/api/cards", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const query = `
-      SELECT
-        id,
-        user_id,
-        content,
-        original_content,
-        platform,
-        status,
-        is_edited,
-        created_at,
-        updated_at
-      FROM cards
-      ORDER BY created_at DESC
-    `;
-    const results = await pool.query(query);
-    console.log("Results:\n", results.rows);
-
-    res.json({ message: "posted", data: results.rows });
-  } catch (err) {
-    console.log("there was an error!", err);
-    res.status(500).json({
-      error: "500",
-      message: err,
-    });
-  }
-});
-
-app.get("/api/user", async (req, res) => {
-  const _req = req.query;
-
-  console.log("[/api/user]:", _req);
-  const _query: string = `
-    SELECT *
-    FROM profiles
-    WHERE firebase_uid = '${_req.uid}'
-  `;
-
-  try {
-    if (!_req.uid) throw Error("UID was not provided");
-    const results = await pool.query(_query);
-    const data = results.rows[0];
-    console.log("query results:", data);
-
-    res.status(200).json({ status: "success", data: data });
-  } catch (err) {
-    res.status(401).json({ status: "error", message: err });
-  }
-});
 
 // I don't think that this will be needed at all
 // app.get("/api/profile", async (req, res): Promise<unknown> => {
@@ -141,8 +127,6 @@ app.post("/api/profile/onboard", async (req, res): Promise<unknown> => {
   const _step = _req["step"];
   const _data = _req["data"];
 
-  console.log("step:", _step);
-  console.log("request:", _req);
   const query = `
     INSERT INTO profiles (
       handle,
@@ -172,7 +156,6 @@ app.post("/api/profile/onboard", async (req, res): Promise<unknown> => {
   try {
     let results = await pool.query(query, values);
     results = results.rows[0];
-    console.log("results:\n", results.rows);
 
     return res.status(200).json({ message: "success", body: results });
   } catch (err: unknown) {
